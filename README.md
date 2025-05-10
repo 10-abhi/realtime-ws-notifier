@@ -9,6 +9,10 @@ A lightweight WebSocket server using Redis Pub/Sub to deliver real-time events t
 - WebSocket (ws)
 - Redis (Pub/Sub)
 
+### 🧠 Project Architecture
+
+![Architecture Diagram](./assets/pubssubs.png)
+
 ## 🧠 How It Works
 
 1. **Client Connects**: A browser (or any WebSocket client) connects and sends their `userId` as the first message.
@@ -51,9 +55,8 @@ docker exec -it my-redis /bin/bash
 
 ### Access Redis CLI inside the container
 redis-cli
-
+```
 
 ### 2. Start the WebSocket Server
-
 ```bash
 ts-node src/websocket.ts
