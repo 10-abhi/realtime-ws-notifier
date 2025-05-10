@@ -36,7 +36,22 @@ For **basic local testing**, the WebSocket server (`websocket.ts`) and Redis sub
 
 ### 1. Start Redis Server
 
-Make sure Redis server is running on your system.
+Make sure Redis server is running on your system and also redis should be running locally.
+
+### 🐳 How to Run Redis Locally and Use It as a DB
+
+You can use Docker to quickly start a Redis instance locally:
+
+```bash
+### Start Redis container
+docker run --name my-redis -d -p 6379:6379 redis
+
+### Connect to the running Redis container
+docker exec -it my-redis /bin/bash
+
+### Access Redis CLI inside the container
+redis-cli
+
 
 ### 2. Start the WebSocket Server
 
