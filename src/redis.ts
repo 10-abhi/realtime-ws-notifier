@@ -1,8 +1,18 @@
+import "dotenv/config";
 import { createClient } from "redis";
 import { getClients } from "./client";
 
-const redisSubscriber = createClient();
+const redisSubscriber = createClient(
+  {url: process.env.REDIS_URL}  
+);
 
+if (!process.env.REDIS_URL) {
+  throw new Error("REDIS_URL is not set");
+}
+
+redisSubscriber.on("error" , function(err){
+    throw err;
+})
 redisSubscriber.connect().then(() => {
     console.log("connected to redis")
 }).catch((err) => { console.log("Error while connecting to redis", err) })
