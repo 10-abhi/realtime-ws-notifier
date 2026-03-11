@@ -57,6 +57,12 @@ docker exec -it my-redis /bin/bash
 redis-cli
 ```
 
+ ```bash 
+ #### Or to use directly deployed redis url then use the following command
+
+  redis-cli -u <redis-env-var>
+
+
 ### 2. Start the WebSocket Server
 ```bash
-ts-node src/websocket.ts
+ts-node src/index.ts (this would run both websocket and redis in the same process so they can share memory(userId))

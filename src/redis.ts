@@ -33,7 +33,7 @@ redisSubscriber.subscribe(CHANNEL, (message) => {
         for (const socket of sockets) {
             if (socket.readyState == socket.OPEN) {
                 console.log("message inside the subscriber", message);
-                socket.send(JSON.stringify(message));
+                socket.send(message);
             }
         }
     } catch (error) {
