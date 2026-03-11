@@ -1,40 +1,56 @@
-import http from 'http';
-import {WebSocketServer} from 'ws';
-import { addClient , removeClient , UserId } from './client';
+import http from "http";
+import { WebSocketServer } from "ws";
+import { addClient, removeClient, UserId } from "./client";
 
 const server = http.createServer();
-const wss = new WebSocketServer({server});
+const wss = new WebSocketServer({ server });
 
-wss.on('connection', (ws)=>{
-    let userId : UserId;
+wss.on("connection", (ws, req) => {
 
-    //accepting one msg(userId) from client
-    ws.once('message', (message)=>{
+    const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+
+    const token = url.searchParams.get("token");
+
+    if (process.env.WS_SECRET && token !== process.env.WS_SECRET) {
+        ws.close(1008, "Unauthorized");
+        return;
+    }
+
+    let userId: UserId | undefined;
+
+    const initTimer = setTimeout(() => {
+        ws.close(1008, "Initoal timeout");
+    }, 30000);
+
+    //accepting one msg (userId) from client
+    ws.once("message", (message) => {
         try {
+        clearTimeout(initTimer);
         const data = JSON.parse(message.toString());
-        if(!data.userId){
-            ws.close(1000, 'Missing userId');
+        if (!data?.userId || typeof data.userId !== "string") {
+            ws.close(1008, "Missing userId");
             return;
         }
-        userId = data.userId;
-        console.log("the type of the userid in the websocket field is : " , typeof(userId));
+        const connectedUserId: UserId = data.userId;
+        userId = connectedUserId;
         addClient(userId, ws);
         console.log(`User ${userId} connected`);
         
-        ws.on('close',()=>{
-            if(userId){
+        ws.on("close", () => {
+            if (userId) {
             removeClient(userId, ws);
             console.log(`User ${userId} disconnected`);
             }
         });
         } catch (error) {
-          console.error('Invalid message format', error);
-          ws.close(1000, 'Invalid message format'); 
+          clearTimeout(initTimer);
+          console.error("Invalid message format", error);
+          ws.close(1003, "Invalid message format");
         }
-    })
-})
+    });
+});
 
-const PORT = 8080;
-server.listen(PORT , ()=>{
+const PORT = Number(process.env.PORT) || 8080;
+server.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
-})
+});
