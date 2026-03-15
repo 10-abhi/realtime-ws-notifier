@@ -1,6 +1,7 @@
 import http from "http";
 import { WebSocketServer } from "ws";
 import { addClient, removeClient, UserId } from "./client";
+import { flushPendingEvents } from "./redis";
 
 const server = http.createServer();
 const wss = new WebSocketServer({ server });
@@ -23,7 +24,7 @@ wss.on("connection", (ws, req) => {
     }, 30000);
 
     //accepting one msg (userId) from client
-    ws.once("message", (message) => {
+    ws.once("message", async (message) => {
         try {
         clearTimeout(initTimer);
         const data = JSON.parse(message.toString());
@@ -34,6 +35,9 @@ wss.on("connection", (ws, req) => {
         const connectedUserId: UserId = data.userId;
         userId = connectedUserId;
         addClient(userId, ws);
+
+        await flushPendingEvents(userId, ws);
+        
         console.log(`User ${userId} connected`);
         
         ws.on("close", () => {
