@@ -28,7 +28,7 @@ Promise.all([
 }).catch((err) => { console.log("Error while connecting to redis", err); });
 
 const CHANNEL = "user-event";
-const PENDING_TTL_SECONDS = Number(process.env.PENDING_TTL_SECONDS) || 86400;
+const PENDING_SECONDS = Number(process.env.PENDING_SECONDS) || 86400;
 
 redisSubscriber.subscribe(CHANNEL, async (message) => {
     try {
@@ -42,7 +42,7 @@ redisSubscriber.subscribe(CHANNEL, async (message) => {
         if (!sockets || sockets.size === 0) {
             const pendingKey = `pending:${targetUserId}`;
             await redisStorage.rPush(pendingKey, message);
-            await redisStorage.expire(pendingKey, PENDING_TTL_SECONDS);
+            await redisStorage.expire(pendingKey, PENDING_SECONDS);
             return;
         }
 
